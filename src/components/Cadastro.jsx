@@ -85,7 +85,7 @@ const Cadastro = () => {
     }
 
     return (
-        <Card className='w-[70%] h-full'>
+        <Card className='w-[70%] h-full cadastro'>
             <CardHeader>
                 <CardTitle>Cadastro de entrega de chaves</CardTitle>
                 <CardDescription>

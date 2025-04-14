@@ -98,12 +98,12 @@ const Tabela = () => {
 
     return (
         <Card className='w-full'>
-            <CardHeader>
-                <div className='flex items-center justify-between'>
+            <CardHeader className='cabecalho-tabela'>
+                <div className='titulo-tabela flex items-center justify-between'>
                     <CardTitle>
                         Tabela de Chaves Entregues
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className='form-tabela'>
                         <form className='flex gap-3' onSubmit={(e) => {
                             e.preventDefault();
                             buscarChave();
