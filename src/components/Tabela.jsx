@@ -35,9 +35,16 @@ import { db } from '@/firebase'
 const Tabela = () => {
     const [chaves, setChaves] = useState([]);
     const [pesquisaChave, setPesquisaChave] = useState('');
+    const [chavesFiltradas, setChavesFiltradas] = useState([]);
 
     const buscarChave = () => {
-        return;
+        if (pesquisaChave == '') {
+            setChavesFiltradas([]);
+            return;
+        } else {
+            const novasChaves = chaves.filter(chave => chave.chave.includes(pesquisaChave));
+            setChavesFiltradas(novasChaves);
+        }
     }
 
     useEffect(() => {
@@ -61,13 +68,15 @@ const Tabela = () => {
             setChaves(registros);
         });
         return () => chavesEntregues();
-    }, []);
+    }, buscarChave);
 
     const devolucaoChave = async (id) => {
         try {
             await deleteDoc(doc(db, "registros", id));
 
             setChaves((prevChaves) => prevChaves.filter((chave) => chave.id !== id));
+            setPesquisaChave('');
+            setChavesFiltradas([]);
 
             Toastify({
                 text: "Chave devolvida com sucesso!",
@@ -101,14 +110,15 @@ const Tabela = () => {
             <CardHeader className='cabecalho-tabela'>
                 <div className='titulo-tabela flex items-center justify-between'>
                     <CardTitle>
-                        Tabela de Chaves Entregues
+                        Tabela de Chaves Retiradas
                     </CardTitle>
                     <CardDescription className='form-tabela'>
                         <form className='flex gap-3' onSubmit={(e) => {
                             e.preventDefault();
                             buscarChave();
                         }}>
-                            <Input placeholder="Pesquise por uma chave" className='w-50' value={pesquisaChave} onChange={(e) => setPesquisaChave(e.target.value)}/>
+                            <Input placeholder="Pesquise por uma chave" className='w-50' value={pesquisaChave} onChange={(e) =>
+                                setPesquisaChave(e.target.value.toUpperCase())} />
                             <Button className='w-9 h-9 cursor-pointer bg-[#007f71] hover:bg-[#079484]' type='submit'>
                                 <Search />
                             </Button>
@@ -117,60 +127,117 @@ const Tabela = () => {
                 </div>
             </CardHeader>
             <CardContent className='space-y-2'>
-                <Table>
-                    <TableCaption>Lista com as chaves que ainda não foram devolvidas.</TableCaption>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className='w-[100px]'>Data</TableHead>
-                            <TableHead>Hora</TableHead>
-                            <TableHead>Matrícula</TableHead>
-                            <TableHead>Chave</TableHead>
-                            <TableHead>Devolução</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {chaves.map((chave) => (
-                            <TableRow key={chave.id}>
-                                <TableCell className='font-medium'>{chave.dataFormatada}</TableCell>
-                                <TableCell>{chave.horaFormatada}</TableCell>
-                                <TableCell>{chave.matricula}</TableCell>
-                                <TableCell>{chave.chave}</TableCell>
-                                <TableCell>
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <Button className='cursor-pointer w-[100%] bg-[#007f71] hover:bg-[#079484]'>Confirmar devolução</Button>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>
-                                                    Devolução de Chave
-                                                </DialogTitle>
-                                                <DialogDescription>
-                                                    Deseja confirmar que o funcionário devolveu a chave?
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                            <DialogFooter className='grid grid-cols-2'>
-                                                <DialogClose asChild>
-                                                    <Button variant='destructive' className='w-full cursor-pointer'>Cancelar devolução</Button>
-                                                </DialogClose>
-
-                                                <DialogClose asChild>
-                                                    <Button className='w-full cursor-pointer bg-[#007f71] hover:bg-[#079484]' onClick={() => devolucaoChave(chave.id)}>Confirmar devolução</Button>
-                                                </DialogClose>
-                                            </DialogFooter>
-                                        </DialogContent>
-                                    </Dialog>
-                                </TableCell>
+                {pesquisaChave == '' ? (
+                    <Table>
+                        <TableCaption>Lista com as chaves que ainda não foram devolvidas.</TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className='w-[100px]'>Data</TableHead>
+                                <TableHead>Hora</TableHead>
+                                <TableHead>Matrícula</TableHead>
+                                <TableHead>Chave</TableHead>
+                                <TableHead>Devolução</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                    <TableFooter>
-                        <TableRow>
-                            <TableCell colSpan={4}>Total de chaves</TableCell>
-                            <TableCell className='text-right'>{chaves.length}</TableCell>
-                        </TableRow>
-                    </TableFooter>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {chaves.map((chave) => (
+                                <TableRow key={chave.id}>
+                                    <TableCell className='font-medium'>{chave.dataFormatada}</TableCell>
+                                    <TableCell>{chave.horaFormatada}</TableCell>
+                                    <TableCell>{chave.matricula}</TableCell>
+                                    <TableCell>{chave.chave}</TableCell>
+                                    <TableCell>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button className='cursor-pointer w-[100%] bg-[#007f71] hover:bg-[#079484]'>Confirmar devolução</Button>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>
+                                                        Devolução de Chave
+                                                    </DialogTitle>
+                                                    <DialogDescription>
+                                                        Deseja confirmar que o funcionário devolveu a chave?
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                <DialogFooter className='grid grid-cols-2'>
+                                                    <DialogClose asChild>
+                                                        <Button variant='destructive' className='w-full cursor-pointer'>Cancelar devolução</Button>
+                                                    </DialogClose>
+
+                                                    <DialogClose asChild>
+                                                        <Button className='w-full cursor-pointer bg-[#007f71] hover:bg-[#079484]' onClick={() => devolucaoChave(chave.id)}>Confirmar devolução</Button>
+                                                    </DialogClose>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                        <TableFooter>
+                            <TableRow>
+                                <TableCell colSpan={4}>Total de chaves</TableCell>
+                                <TableCell className='text-right'>{chaves.length}</TableCell>
+                            </TableRow>
+                        </TableFooter>
+                    </Table>
+                ) : (
+                    <Table>
+                        <TableCaption>Lista com as chaves que ainda não foram devolvidas.</TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className='w-[100px]'>Data</TableHead>
+                                <TableHead>Hora</TableHead>
+                                <TableHead>Matrícula</TableHead>
+                                <TableHead>Chave</TableHead>
+                                <TableHead>Devolução</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {chavesFiltradas.map((chave) => (
+                                <TableRow key={chave.id}>
+                                    <TableCell className='font-medium'>{chave.dataFormatada}</TableCell>
+                                    <TableCell>{chave.horaFormatada}</TableCell>
+                                    <TableCell>{chave.matricula}</TableCell>
+                                    <TableCell>{chave.chave}</TableCell>
+                                    <TableCell>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button className='cursor-pointer w-[100%] bg-[#007f71] hover:bg-[#079484]'>Confirmar devolução</Button>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>
+                                                        Devolução de Chave
+                                                    </DialogTitle>
+                                                    <DialogDescription>
+                                                        Deseja confirmar que o funcionário devolveu a chave?
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                <DialogFooter className='grid grid-cols-2'>
+                                                    <DialogClose asChild>
+                                                        <Button variant='destructive' className='w-full cursor-pointer'>Cancelar devolução</Button>
+                                                    </DialogClose>
+
+                                                    <DialogClose asChild>
+                                                        <Button className='w-full cursor-pointer bg-[#007f71] hover:bg-[#079484]' onClick={() => devolucaoChave(chave.id)}>Confirmar devolução</Button>
+                                                    </DialogClose>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                        <TableFooter>
+                            <TableRow>
+                                <TableCell colSpan={4}>Total de chaves</TableCell>
+                                <TableCell className='text-right'>{chaves.length}</TableCell>
+                            </TableRow>
+                        </TableFooter>
+                    </Table>
+                )}
             </CardContent>
         </Card>
     )

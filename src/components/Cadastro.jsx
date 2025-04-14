@@ -89,7 +89,7 @@ const Cadastro = () => {
             <CardHeader>
                 <CardTitle>Cadastro de entrega de chaves</CardTitle>
                 <CardDescription>
-                    Preencha com os dados necessários para cadastrar a entrega de uma chave a um funcionário
+                    Preencha com os dados necessários para entregar uma chave
                 </CardDescription>
             </CardHeader>
             <form className='flex flex-col gap-4' onSubmit={(e) => {
